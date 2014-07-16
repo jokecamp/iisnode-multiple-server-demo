@@ -1,0 +1,63 @@
+<html>
+<head><title>IISNode with mulitple servers in one application</title></head>
+<body>
+
+<h1>IISNode with mulitple servers in one application</h1>
+<pre>
+Client html file. I am served by IIS as a static file. I do not go to node.
+
+There are two seperate node servers both hosted inside the same Application Pool in IIS. 
+Notice the creation dates and random number guids. 
+Change the web.config value nodeProcessCountPerApplication=x and test the results. You will
+see that IISNode balances the load between the number of node processes for each server*.js file.
+
+Example web.config code:
+
+    &lt;handlers&gt;
+      &lt;add name="iisnode-nfxplanner1" path="server*.js" verb="*" modules="iisnode" /&gt;
+    &lt;/handlers&gt;
+    
+   &lt;iisnode  
+        nodeProcessCommandLine="&quot;%programfiles%\nodejs\node.exe&quot;"   
+        interceptor="&quot;%programfiles%\iisnode\interceptor.js&quot;" 
+        nodeProcessCountPerApplication="2"
+    /&gt;
+
+Key
+---
+server = file used to start node.exe
+Created = when node.exe was started for that server file
+id = to identify the node.exe process running
+
+</pre>
+
+
+<pre id="server1" style="display:inline;float:left; border:solid 1px black; padding:5px; margin:2px;"></pre>
+<pre id="server2" style="display:inline;float:left; border:solid 1px black; padding:5px;  margin:2px;"></pre>
+
+<script>
+
+	function httpGet(theUrl)
+	{
+	    var xmlHttp = null;
+	    xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", theUrl, false );
+	    xmlHttp.send( null );
+	    return xmlHttp.responseText;
+	}
+
+	function Ping() {
+
+		document.getElementById("server1").innerHTML += httpGet('server1.js') + "<br>";
+		document.getElementById("server2").innerHTML += httpGet('server2.js') + "<br>";
+
+	    setTimeout(Ping, 1000);
+	}
+
+	// initial call, or just call Ping directly
+	setTimeout(Ping, 100);
+
+</script>
+
+</body>
+</html>
